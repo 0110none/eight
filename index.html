@@ -392,6 +392,9 @@
 
     const STEMS = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
     const BRANCHES = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+    const JIAZI_60 = Array.from({length:60}, (_,i)=> STEMS[i%10] + BRANCHES[i%12]);
+    // 六甲旬首遁干：甲子戊、甲戌己、甲申庚、甲午辛、甲辰壬、甲寅癸（时家奇门常用口径）
+    const XUN_SHOU_HIDE_STEM = {"甲子":"戊","甲戌":"己","甲申":"庚","甲午":"辛","甲辰":"壬","甲寅":"癸"};
     const SOLAR_TERMS = ["小寒","大寒","立春","雨水","惊蛰","春分","清明","谷雨","立夏","小满","芒种","夏至","小暑","大暑","立秋","处暑","白露","秋分","寒露","霜降","立冬","小雪","大雪","冬至"];
     const S_TERM_INFO = [0,21208,42467,63836,85337,107014,128867,150921,173149,195551,218072,240693,263343,285989,308563,331033,353350,375494,397447,419210,440795,462224,483532,504758];
 
@@ -544,6 +547,29 @@
     /** @param {number} n @param {number} mod */
     function positiveMod(n, mod){ return ((n%mod)+mod)%mod; }
 
+    /** @param {string} gz 干支，如“甲子” */
+    function ganzhiIndex(gz){
+      return JIAZI_60.indexOf(gz);
+    }
+
+    /**
+     * 求时干支所属旬首（甲子/甲戌/甲申/甲午/甲辰/甲寅）。
+     * @param {string} hourGanzhi
+     */
+    function getXunShou(hourGanzhi){
+      const idx = ganzhiIndex(hourGanzhi);
+      if (idx < 0) return "甲子";
+      const xunStart = Math.floor(idx / 10) * 10;
+      return JIAZI_60[xunStart];
+    }
+
+    /** @param {number} palace @param {boolean=} includeCenter */
+    function palaceToRoutePos(palace, includeCenter=false){
+      const route = includeCenter ? NINE_PALACE_ORDER : NINE_PALACE_ORDER.filter(p=>p!==5);
+      const i = route.indexOf(Number(palace));
+      return i >= 0 ? i + 1 : 1;
+    }
+
     /** @param {Date} date */
     function calcMeihua(date){
       const p = toShanghaiParts(date);
@@ -653,12 +679,16 @@
       const earthSeq = yinYang === "阳遁" ? EARTH_STEMS_YANG : EARTH_STEMS_YIN;
       const earth = buildCycleOnPalaces(earthSeq, ju, yinYang);
 
-      const zhiShiDoorIndex = positiveMod(gz.indexes.hourBranchIdx,8);
-      const zhiFuStarIndex = positiveMod(gz.indexes.hourBranchIdx,9);
+      // 关键改进：按“时干支所属旬首 -> 六甲遁干”确定值符/值使起宫，避免直接用时支简化轮转。
+      const xunShou = getXunShou(gz.hour);
+      const hideStem = XUN_SHOU_HIDE_STEM[xunShou] || "戊";
+      const xunShouPalace = Number(Object.keys(earth).find(k=>earth[k]===hideStem) || 1);
+      const zhiFuStartPos = palaceToRoutePos(xunShouPalace, true);
+      const zhiShiStartPos = palaceToRoutePos(xunShouPalace, false);
 
-      const stars = buildCycleOnPalaces(STAR_ORDER, zhiFuStarIndex+1, yinYang, true);
-      const doors = buildCycleOnPalaces(DOOR_ORDER, zhiShiDoorIndex+1, yinYang, false, true);
-      const gods = buildCycleOnPalaces(yinYang==="阳遁"?GOD_YANG:GOD_YIN, 1, yinYang, false, true);
+      const stars = buildCycleOnPalaces(STAR_ORDER, zhiFuStartPos, yinYang, true);
+      const doors = buildCycleOnPalaces(DOOR_ORDER, zhiShiStartPos, yinYang, false, true);
+      const gods = buildCycleOnPalaces(yinYang==="阳遁"?GOD_YANG:GOD_YIN, zhiShiStartPos, yinYang, false, true);
 
       const tianGan = {};
       for(const p of NINE_PALACE_ORDER){
@@ -700,7 +730,8 @@
           `2) 遁局判定：夏至后阴遁、冬至后阳遁，当前为${yinYang}`,
           `3) 当前节气：${jie}；日干支序号=${yuan.ganZhiIndex}，归属${yuan.yuan}`,
           `4) 依据${yinYang}+${jie}+${yuan.yuan} => ${ju}局`,
-          "5) 地盘按三奇六仪顺/逆布，天盘随值符星转，八门随值使布，八神随遁法顺逆。"
+          `5) 时柱${gz.hour}所属旬首${xunShou}，六甲遁干为${hideStem}，落${PALACE_NAMES[xunShouPalace]}作值符值使起宫。`,
+          "6) 地盘按三奇六仪顺/逆布，天盘随值符星转，八门随值使布，八神随遁法顺逆。"
         ]
       };
     }
