@@ -455,9 +455,25 @@
       return `${p.year}-${pad(p.month)}-${pad(p.day)}T${pad(p.hour)}:${pad(p.minute)}`;
     }
 
-    /** @param {string} value */
+    /**
+     * 将 datetime-local 字符串按 Asia/Shanghai 固定时区解释为绝对时间。
+     * 说明：不能直接 new Date(value)，否则会按浏览器本地时区解析，导致跨时区结果偏移。
+     * @param {string} value
+     */
     function parseDatetimeLocal(value){
-      const d = new Date(value);
+      const m = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+      if (!m) throw new Error("无效时间格式，应为 YYYY-MM-DDTHH:mm");
+      const year = Number(m[1]);
+      const month = Number(m[2]);
+      const day = Number(m[3]);
+      const hour = Number(m[4]);
+      const minute = Number(m[5]);
+      if (month < 1 || month > 12 || day < 1 || day > 31 || hour > 23 || minute > 59) {
+        throw new Error("无效时间数值");
+      }
+      // Asia/Shanghai 固定 UTC+8（现代时段不考虑夏令时）
+      const utcMs = Date.UTC(year, month - 1, day, hour - 8, minute, 0, 0);
+      const d = new Date(utcMs);
       if (Number.isNaN(d.getTime())) throw new Error("无效时间");
       return d;
     }
