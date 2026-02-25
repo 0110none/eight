@@ -145,6 +145,16 @@
       box-shadow: 0 4px 10px rgba(79,97,116,.24);
     }
     .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+    .toggle-btn {
+      border: 1px solid var(--border);
+      background: #f6f9fd;
+      color: #30445f;
+      box-shadow: none;
+      font-weight: 600;
+    }
+    .toggle-btn:hover { background: #eef3f9; }
+    .collapsible { display: none; margin-top: 10px; }
+    .collapsible.open { display: block; }
     pre {
       margin: 0;
       background: #f7f9fc;
@@ -285,10 +295,19 @@
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="qimenVisualPanel" style="display:none;">
       <div class="stage">STEP 2</div>
-      <h2>排盘过程</h2>
-      <pre id="processOut">等待计算...</pre>
+      <h2>奇门九宫（可视化）</h2>
+      <div id="qimenDirSummary" class="dir-list muted"></div>
+      <div class="palace-grid" id="palaceGrid"></div>
+      <div class="legend">
+        <h3>判读口径（主流简化）</h3>
+        <ul>
+          <li>门为主，星为辅，神为佐：门的吉凶权重最高，用于判断“该方位是否宜主动出击”。</li>
+          <li>吉门：休/生/开；凶门：伤/杜/死/惊；景门偏中性（偏展示、传播）。</li>
+          <li>九星与八神用于修正：如天心/天任/天辅、值符/六合/太阴多助力；白虎/玄武/螣蛇多风险。</li>
+        </ul>
+      </div>
     </div>
 
     <div class="panel">
@@ -300,18 +319,12 @@
       </div>
     </div>
 
-    <div class="panel" id="qimenVisualPanel" style="display:none;">
+    <div class="panel">
       <div class="stage">STEP 4</div>
-      <h2>奇门九宫（可视化）</h2>
-      <div id="qimenDirSummary" class="dir-list muted"></div>
-      <div class="palace-grid" id="palaceGrid"></div>
-      <div class="legend">
-        <h3>判读口径（主流简化）</h3>
-        <ul>
-          <li>门为主，星为辅，神为佐：门的吉凶权重最高，用于判断“该方位是否宜主动出击”。</li>
-          <li>吉门：休/生/开；凶门：伤/杜/死/惊；景门偏中性（偏展示、传播）。</li>
-          <li>九星与八神用于修正：如天心/天任/天辅、值符/六合/太阴多助力；白虎/玄武/螣蛇多风险。</li>
-        </ul>
+      <h2>排盘过程</h2>
+      <button id="toggleProcessBtn" class="toggle-btn">点击展开排盘过程</button>
+      <div id="processWrap" class="collapsible">
+        <pre id="processOut">等待计算...</pre>
       </div>
     </div>
   </div>
@@ -815,6 +828,7 @@
       setNowTime();
       document.getElementById("nowBtn").addEventListener("click", setNowTime);
       document.getElementById("runBtn").addEventListener("click", run);
+      document.getElementById("toggleProcessBtn").addEventListener("click", toggleProcess);
       document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
       document.getElementById("palaceModal").addEventListener("click", (e)=>{
         if(e.target.id === "palaceModal") closeModal();
@@ -832,8 +846,18 @@
       document.getElementById("dt").value = partsToLocalDatetimeValue(p);
     }
 
+
+    function toggleProcess(){
+      const wrap = document.getElementById("processWrap");
+      const btn = document.getElementById("toggleProcessBtn");
+      const open = wrap.classList.toggle("open");
+      btn.textContent = open ? "点击收起排盘过程" : "点击展开排盘过程";
+    }
+
     function run(){
       try {
+        document.getElementById("processWrap").classList.remove("open");
+        document.getElementById("toggleProcessBtn").textContent = "点击展开排盘过程";
         const system = document.getElementById("system").value;
         const date = parseDatetimeLocal(document.getElementById("dt").value);
         const topic = TOPICS.find(t=>t.id===document.getElementById("topic").value);
