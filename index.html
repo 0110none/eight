@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>术数排盘工具（梅花易数 / 时家奇门遁甲）</title>
+  <style>
+    :root {
+      --bg: #eef2f7;
+      --panel: #ffffff;
+      --text: #142235;
+      --muted: #607086;
+      --primary: #2a3f5f;
+      --primary-2: #223554;
+      --accent-gold: #b69a63;
+      --accent-cyan: #6f8f9f;
+      --border: #d6deea;
+      --ok: #3f5f76;
+      --good-bg: #f4efe3;
+      --good-bd: #c4aa78;
+      --bad-bg: #ecf1f5;
+      --bad-bd: #8aa0b0;
+      --mid-bg: #f7f9fc;
+      --mid-bd: #9fb0c1;
+      --shadow: 0 10px 24px rgba(26, 40, 60, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(1200px 620px at 95% -10%, rgba(42,63,95,.12), transparent 58%),
+        radial-gradient(1000px 540px at -8% 0%, rgba(111,143,159,.10), transparent 52%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.68;
+    }
+    .container {
+      max-width: 1220px;
+      margin: 24px auto;
+      padding: 0 16px 30px;
+    }
+    h1, h2, h3 { margin: 0 0 12px; }
+    h1 {
+      font-size: clamp(24px, 3vw, 32px);
+      letter-spacing: .3px;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      color: var(--muted);
+      margin: 0 0 14px;
+      font-size: 14px;
+    }
+    .panel {
+      background: linear-gradient(180deg, #ffffff, #fcfdff);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+    .panel h2 {
+      font-size: 20px;
+      margin-bottom: 14px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid #e6ebf3;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .stage { font-size: 12px; color: var(--accent-cyan); letter-spacing: .8px; margin-bottom: 6px; font-weight: 700; }
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 14px;
+      background: #fff;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    input[type="checkbox"] {
+      width: auto;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      accent-color: var(--primary);
+      box-shadow: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #6ea2ff;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    }
+    textarea { min-height: 96px; resize: vertical; }
+    .inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .checkboxes {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px 12px;
+    }
+    .checkboxes label {
+      margin: 0;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f8fafd;
+      line-height: 1.2;
+    }
+    @media (max-width: 900px) {
+      .checkboxes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    button {
+      border: none;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(34,53,84,.28);
+      transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(1.03); }
+    button.secondary {
+      background: linear-gradient(135deg, #78889a, #687b8d);
+      box-shadow: 0 4px 10px rgba(79,97,116,.24);
+    }
+    .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+    pre {
+      margin: 0;
+      background: #f7f9fc;
+      color: #223246;
+      padding: 14px;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 13px;
+      border: 1px solid #d8e1ee;
+      line-height: 1.7;
+    }
+    .muted { color: var(--muted); font-size: 13px; }
+    .disclaimer {
+      border-left: 4px solid #f59e0b;
+      padding: 10px 12px;
+      background: #fffbeb;
+      color: #78350f;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .palace-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 760px;
+      margin: 12px auto 0;
+    }
+    .palace {
+      border: 1px solid #d6deea;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 13px;
+      background: #f9fbfe;
+      cursor: pointer;
+      transition: .15s ease;
+    }
+    .palace:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(40,54,74,.10); }
+    .palace.good { background: var(--good-bg); border-color: var(--good-bd); }
+    .palace.bad { background: var(--bad-bg); border-color: var(--bad-bd); }
+    .palace.neutral { background: var(--mid-bg); border-color: var(--mid-bd); }
+    .palace.focus { box-shadow: inset 0 0 0 1px rgba(182,154,99,.35), 0 4px 12px rgba(182,154,99,.18); }
+    .palace-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .dir { font-size: 12px; color: var(--muted); }
+    .tags { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag {
+      font-size: 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      padding: 2px 7px;
+      background: #fff;
+    }
+    .score { font-size: 12px; font-weight: 700; }
+    .score.good { color: #8d7241; }
+    .score.bad { color: #4f6b80; }
+    .score.neutral { color: #4d6176; }
+    .dir-list { margin-top: 8px; font-size: 14px; }
+    .legend { margin-top: 10px; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; }
+    .legend h3 { margin: 0 0 8px; font-size: 15px; }
+    .legend ul { margin: 0; padding-left: 18px; color: #334155; font-size: 13px; }
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+    .modal.open { display: flex; }
+    .modal-card {
+      width: min(720px, 100%);
+      max-height: 86vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 16px;
+    }
+    .modal-close {
+      float: right;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #0f172a;
+      padding: 4px 10px;
+      font-size: 13px;
+    }
+    .ok { color: var(--ok); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>术数排盘工具（梅花易数 / 时家奇门遁甲）</h1>
+    <p class="subtitle">专业排盘 · 规则透明 · 便于操作与理解（时区固定 Asia/Shanghai）</p>
+    <div class="panel">
+      <div class="grid">
+        <div>
+          <label for="system">选择系统</label>
+          <select id="system">
+            <option value="meihua">易经（梅花易数时间起卦法）</option>
+            <option value="qimen">时家奇门遁甲（转盘法）</option>
+          </select>
+        </div>
+        <div>
+          <label for="dt">占卜时间（Asia/Shanghai）</label>
+          <input id="dt" type="datetime-local" />
+          <div class="inline">默认读取浏览器当前时间，可手动修改</div>
+        </div>
+        <div>
+          <label for="region">地区（暂不参与运算）</label>
+          <input id="region" value="广东省佛山市" />
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="stage">STEP 1</div>
+      <h2>占卜输入</h2>
+      <div class="grid">
+        <div>
+          <label for="topic">问题类别</label>
+          <select id="topic"></select>
+          <div id="topicMeta" class="muted"></div>
+        </div>
+        <div>
+          <label for="question">问题详情</label>
+          <textarea id="question" placeholder="请尽量描述背景、目标、时间点"></textarea>
+        </div>
+      </div>
+      <h3 style="margin-top:14px;">特殊情况</h3>
+      <div class="checkboxes" id="specialWrap"></div>
+    </div>
+
+    <div class="panel">
+      <div class="btns">
+        <button id="runBtn">开始排盘</button>
+        <button class="secondary" id="nowBtn">恢复当前时间</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="stage">STEP 2</div>
+      <h2>排盘过程</h2>
+      <pre id="processOut">等待计算...</pre>
+    </div>
+
+    <div class="panel">
+      <div class="stage">STEP 3</div>
+      <h2>结果解读</h2>
+      <pre id="interpretOut">等待计算...</pre>
+      <div class="disclaimer" style="margin-top:10px;">
+        免责声明：本工具用于传统术数学习与文化研究，不构成法律、医疗、投资等专业建议。重大决策请结合现实证据与专业意见。
+      </div>
+    </div>
+
+    <div class="panel" id="qimenVisualPanel" style="display:none;">
+      <div class="stage">STEP 4</div>
+      <h2>奇门九宫（可视化）</h2>
+      <div id="qimenDirSummary" class="dir-list muted"></div>
+      <div class="palace-grid" id="palaceGrid"></div>
+      <div class="legend">
+        <h3>判读口径（主流简化）</h3>
+        <ul>
+          <li>门为主，星为辅，神为佐：门的吉凶权重最高，用于判断“该方位是否宜主动出击”。</li>
+          <li>吉门：休/生/开；凶门：伤/杜/死/惊；景门偏中性（偏展示、传播）。</li>
+          <li>九星与八神用于修正：如天心/天任/天辅、值符/六合/太阴多助力；白虎/玄武/螣蛇多风险。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="palaceModal">
+    <div class="modal-card">
+      <button class="modal-close" id="modalCloseBtn">关闭</button>
+      <h3 id="modalTitle">宫位详情</h3>
+      <pre id="modalBody"></pre>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * 术数数据与算法说明：
+     * 1) 梅花易数：按用户指定规则（年/月/日/时取余）计算上卦、下卦、动爻，再依动爻变卦。
+     * 2) 时家奇门：采用转盘法常见流程（按节气定月、冬至后阳遁/夏至后阴遁、按日干支定三元再得局数）。
+     * 3) 干支与节气：使用常见“寿星通用近似算法”计算24节气时刻（1900~2100常用范围）。
+     * 4) 所有核心计算函数保持纯函数，可单独输入参数测试。
+     */
+
+    const TRIGRAMS = [
+      { name: "坤", lines: [0,0,0], code: 0 },
+      { name: "乾", lines: [1,1,1], code: 1 },
+      { name: "兑", lines: [1,1,0], code: 2 },
+      { name: "离", lines: [1,0,1], code: 3 },
+      { name: "震", lines: [1,0,0], code: 4 },
+      { name: "巽", lines: [0,1,1], code: 5 },
+      { name: "坎", lines: [0,1,0], code: 6 },
+      { name: "艮", lines: [0,0,1], code: 7 }
+    ];
+
+    const REMAINDER_TO_TRIGRAM = {
+      1: "乾", 2: "兑", 3: "离", 4: "震", 5: "巽", 6: "坎", 7: "艮", 8: "坤"
+    };
+
+    const TRIGRAM_INDEX = { "乾":1, "兑":2, "离":3, "震":4, "巽":5, "坎":6, "艮":7, "坤":0 };
+
+    const HEXAGRAM_TABLE = [
+      [2,23,8,20,16,35,45,12],
+      [15,52,39,53,62,56,31,33],
+      [7,4,29,59,40,64,47,6],
+      [46,18,48,57,32,50,28,44],
+      [24,27,3,42,51,21,17,25],
+      [36,22,63,37,55,30,49,13],
+      [19,41,60,61,54,38,58,10],
+      [11,26,5,9,34,14,43,1]
+    ];
+
+    const HEXAGRAM_NAMES = {
+      1:"乾为天",2:"坤为地",3:"水雷屯",4:"山水蒙",5:"水天需",6:"天水讼",7:"地水师",8:"水地比",9:"风天小畜",10:"天泽履",11:"地天泰",12:"天地否",13:"天火同人",14:"火天大有",15:"地山谦",16:"雷地豫",17:"泽雷随",18:"山风蛊",19:"地泽临",20:"风地观",21:"火雷噬嗑",22:"山火贲",23:"山地剥",24:"地雷复",25:"天雷无妄",26:"山天大畜",27:"山雷颐",28:"泽风大过",29:"坎为水",30:"离为火",31:"泽山咸",32:"雷风恒",33:"天山遁",34:"雷天大壮",35:"火地晋",36:"地火明夷",37:"风火家人",38:"火泽睽",39:"水山蹇",40:"雷水解",41:"山泽损",42:"风雷益",43:"泽天夬",44:"天风姤",45:"泽地萃",46:"地风升",47:"泽水困",48:"水风井",49:"泽火革",50:"火风鼎",51:"震为雷",52:"艮为山",53:"风山渐",54:"雷泽归妹",55:"雷火丰",56:"火山旅",57:"巽为风",58:"兑为泽",59:"风水涣",60:"水泽节",61:"风泽中孚",62:"雷山小过",63:"水火既济",64:"火水未济"
+    };
+
+    const TOPICS = [
+      { id: "love", label: "感情", dimensions: ["关系状态", "沟通阻碍", "时间窗口"] },
+      { id: "career", label: "事业", dimensions: ["岗位机会", "人事关系", "晋升节奏"] },
+      { id: "wealth", label: "财运", dimensions: ["现金流", "风险暴露", "短中期策略"] },
+      { id: "health", label: "健康", dimensions: ["作息压力", "症状变化", "就医时机"] },
+      { id: "study", label: "学业", dimensions: ["考试表现", "注意力", "学习计划"] },
+      { id: "lawsuit", label: "诉讼", dimensions: ["证据完整性", "对方动向", "阶段结果"] },
+      { id: "travel", label: "出行", dimensions: ["行程安全", "延误概率", "合作因素"] }
+    ];
+
+    const SPECIAL_CASES = ["第三者", "异地", "试用期", "负债", "家庭阻力", "合伙纠纷", "跨国/跨城", "短期冲刺"];
+
+    const STEMS = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+    const BRANCHES = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+    const SOLAR_TERMS = ["小寒","大寒","立春","雨水","惊蛰","春分","清明","谷雨","立夏","小满","芒种","夏至","小暑","大暑","立秋","处暑","白露","秋分","寒露","霜降","立冬","小雪","大雪","冬至"];
+    const S_TERM_INFO = [0,21208,42467,63836,85337,107014,128867,150921,173149,195551,218072,240693,263343,285989,308563,331033,353350,375494,397447,419210,440795,462224,483532,504758];
+
+    const NINE_PALACE_ORDER = [4,9,2,3,5,7,8,1,6];
+    const PALACE_NAMES = {1:"坎一",2:"坤二",3:"震三",4:"巽四",5:"中五",6:"乾六",7:"兑七",8:"艮八",9:"离九"};
+    const PALACE_DIRECTIONS = {1:"正北",2:"西南",3:"正东",4:"东南",5:"中宫",6:"西北",7:"正西",8:"东北",9:"正南"};
+    const STAR_ORDER = ["蓬","任","冲","辅","英","芮","柱","心","禽"];
+    const DOOR_ORDER = ["休","生","伤","杜","景","死","惊","开"];
+    const GOD_YANG = ["值符","螣蛇","太阴","六合","白虎","玄武","九地","九天"];
+    const GOD_YIN = ["值符","九天","九地","玄武","白虎","六合","太阴","螣蛇"];
+    const EARTH_STEMS_YANG = ["戊","己","庚","辛","壬","癸","丁","丙","乙"];
+    const EARTH_STEMS_YIN = ["戊","乙","丙","丁","癸","壬","辛","庚","己"];
+    const DOOR_META = {
+      休:{level:"吉", score:2, note:"休门主休养与协商，利谈判与修复。"},
+      生:{level:"吉", score:3, note:"生门主生发与资源增长，利求财求职。"},
+      开:{level:"吉", score:3, note:"开门主开启与公开，利签约、见贵、启动项目。"},
+      景:{level:"平", score:0, note:"景门主名声传播，利展示，不宜冒进。"},
+      伤:{level:"凶", score:-2, note:"伤门主冲突损耗，易起摩擦。"},
+      杜:{level:"凶", score:-2, note:"杜门主闭塞阻滞，推进成本高。"},
+      惊:{level:"凶", score:-2, note:"惊门主波动惊扰，信息噪声大。"},
+      死:{level:"凶", score:-3, note:"死门主停滞衰退，不利主动扩张。"},
+      中:{level:"平", score:0, note:"中宫不作单独方位取用。"}
+    };
+    const STAR_META = {
+      心:{level:"吉", score:2, note:"天心星利决策与策略。"}, 任:{level:"吉", score:1, note:"天任星利执行与担当。"}, 辅:{level:"吉", score:1, note:"天辅星利学习与辅助资源。"},
+      英:{level:"平", score:0, note:"天英星重表现，利曝光但需节制。"}, 冲:{level:"平", score:0, note:"天冲星行动力强，宜快进快出。"}, 禽:{level:"平", score:0, note:"天禽星居中调和。"},
+      蓬:{level:"凶", score:-1, note:"天蓬星多欲望与反复。"}, 芮:{level:"凶", score:-1, note:"天芮星主病符，宜谨慎。"}, 柱:{level:"凶", score:-1, note:"天柱星主口舌阻力。"}
+    };
+    const GOD_META = {
+      值符:{level:"吉", score:2, note:"值符主统摄，贵人助力明显。"}, 六合:{level:"吉", score:1, note:"六合主人和，利合作。"}, 太阴:{level:"吉", score:1, note:"太阴主细致稳妥，利暗中推进。"}, 九地:{level:"吉", score:1, note:"九地主稳固，利落地执行。"}, 九天:{level:"吉", score:1, note:"九天主高远，利外拓。"},
+      玄武:{level:"凶", score:-1, note:"玄武主隐情与反复，防信息失真。"}, 白虎:{level:"凶", score:-2, note:"白虎主刚猛与伤损，慎冲突。"}, 螣蛇:{level:"凶", score:-1, note:"螣蛇主虚惊与纠结。"},
+      中:{level:"平", score:0, note:"中宫不单取神。"}
+    };
+
+    /** @typedef {{id:string,label:string,dimensions:string[]}} Topic */
+
+    /** @param {Date} date */
+    function toShanghaiParts(date) {
+      const formatter = new Intl.DateTimeFormat("zh-CN", {
+        timeZone: "Asia/Shanghai",
+        hour12: false,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+      const parts = formatter.formatToParts(date).reduce((acc,p)=> (acc[p.type]=p.value, acc), {});
+      return {
+        year: Number(parts.year),
+        month: Number(parts.month),
+        day: Number(parts.day),
+        hour: Number(parts.hour),
+        minute: Number(parts.minute)
+      };
+    }
+
+    /** @param {{year:number,month:number,day:number,hour:number,minute:number}} p */
+    function partsToLocalDatetimeValue(p){
+      const pad=n=>String(n).padStart(2,"0");
+      return `${p.year}-${pad(p.month)}-${pad(p.day)}T${pad(p.hour)}:${pad(p.minute)}`;
+    }
+
+    /** @param {string} value */
+    function parseDatetimeLocal(value){
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) throw new Error("无效时间");
+      return d;
+    }
+
+    /** @param {number} y @param {number} m @param {number} d */
+    function julianDay(y,m,d){
+      const a = Math.floor((14-m)/12);
+      const yy = y + 4800 - a;
+      const mm = m + 12*a - 3;
+      return d + Math.floor((153*mm+2)/5) + 365*yy + Math.floor(yy/4) - Math.floor(yy/100) + Math.floor(yy/400) - 32045;
+    }
+
+    /** 计算某年某节气的大致时刻（北京时间）。
+     * @param {number} year
+     * @param {number} termIndex 0-23
+     */
+    function solarTermDate(year, termIndex){
+      const base = Date.UTC(1900,0,6,2,5);
+      const ms = 31556925974.7*(year-1900)+S_TERM_INFO[termIndex]*60000;
+      return new Date(base+ms+8*3600*1000);
+    }
+
+    /** @param {number} year */
+    function getSolarTermsOfYear(year){
+      return SOLAR_TERMS.map((name,idx)=>({name,index:idx,date:solarTermDate(year,idx)}));
+    }
+
+    /** @param {Date} date */
+    function getGanzhi(date){
+      const p = toShanghaiParts(date);
+      const y = p.year, m = p.month, d = p.day;
+      const jd = julianDay(y,m,d);
+      const dayStemIdx = (jd + 9) % 10;
+      const dayBranchIdx = (jd + 1) % 12;
+
+      const lichun = solarTermDate(y,2);
+      const yearForGanzhi = date >= lichun ? y : y-1;
+      const yearStemIdx = (yearForGanzhi - 4) % 10;
+      const yearBranchIdx = (yearForGanzhi - 4) % 12;
+
+      const terms = [...getSolarTermsOfYear(y-1), ...getSolarTermsOfYear(y), ...getSolarTermsOfYear(y+1)]
+        .sort((a,b)=>a.date-b.date);
+      const majorTerms = terms.filter(t=> t.index % 2 === 0);
+      let monthIndex = 0;
+      for(let i=0;i<majorTerms.length;i++){
+        if(date >= majorTerms[i].date) monthIndex = i;
+      }
+      const term = majorTerms[monthIndex];
+      const monthBranchIdx = (term.index/2 + 2) % 12;
+      const yearStemForMonth = yearStemIdx;
+      const firstMonthStem = [2,4,6,8,0][Math.floor(yearStemForMonth/2)];
+      const seqFromYin = ((monthBranchIdx - 2 + 12) % 12);
+      const monthStemIdx = (firstMonthStem + seqFromYin) % 10;
+
+      const hourBranchIdx = Math.floor((p.hour + 1) / 2) % 12;
+      const hourStemIdx = (dayStemIdx % 5 * 2 + hourBranchIdx) % 10;
+
+      return {
+        year: STEMS[yearStemIdx] + BRANCHES[yearBranchIdx],
+        month: STEMS[monthStemIdx] + BRANCHES[monthBranchIdx],
+        day: STEMS[dayStemIdx] + BRANCHES[dayBranchIdx],
+        hour: STEMS[hourStemIdx] + BRANCHES[hourBranchIdx],
+        indexes: {yearStemIdx,yearBranchIdx,monthStemIdx,monthBranchIdx,dayStemIdx,dayBranchIdx,hourStemIdx,hourBranchIdx},
+        monthTerm: term.name
+      };
+    }
+
+    /** @param {number} n @param {number} mod */
+    function positiveMod(n, mod){ return ((n%mod)+mod)%mod; }
+
+    /** @param {Date} date */
+    function calcMeihua(date){
+      const p = toShanghaiParts(date);
+      const sumYMD = p.year + p.month + p.day;
+      const sumYMDH = sumYMD + p.hour;
+      const rawUpper = sumYMD % 8;
+      const rawLower = sumYMDH % 8;
+      const rawMoving = sumYMDH % 6;
+      const upperR = rawUpper === 0 ? 8 : rawUpper;
+      const lowerR = rawLower === 0 ? 8 : rawLower;
+      const moving = rawMoving === 0 ? 6 : rawMoving;
+      const upperName = REMAINDER_TO_TRIGRAM[upperR];
+      const lowerName = REMAINDER_TO_TRIGRAM[lowerR];
+
+      const upper = TRIGRAMS.find(t=>t.name===upperName);
+      const lower = TRIGRAMS.find(t=>t.name===lowerName);
+      const lines = [...lower.lines, ...upper.lines];
+      const changed = [...lines];
+      changed[moving-1] = changed[moving-1]===1?0:1;
+      const changedLower = changed.slice(0,3);
+      const changedUpper = changed.slice(3,6);
+      const cLower = TRIGRAMS.find(t=> JSON.stringify(t.lines)===JSON.stringify(changedLower));
+      const cUpper = TRIGRAMS.find(t=> JSON.stringify(t.lines)===JSON.stringify(changedUpper));
+
+      const origNo = hexagramNo(upper.name, lower.name);
+      const changedNo = hexagramNo(cUpper.name, cLower.name);
+
+      return {
+        system: "梅花易数",
+        method: "时间起卦法",
+        input: p,
+        calc: {
+          upper: `${p.year}+${p.month}+${p.day}=${sumYMD}; ${sumYMD}%8=${rawUpper} => ${upperR}`,
+          lower: `${sumYMD}+${p.hour}=${sumYMDH}; ${sumYMDH}%8=${rawLower} => ${lowerR}`,
+          moving: `${sumYMDH}%6=${rawMoving} => ${moving}`
+        },
+        original: { upper: upper.name, lower: lower.name, number: origNo, name: HEXAGRAM_NAMES[origNo], lines },
+        changed: { upper: cUpper.name, lower: cLower.name, number: changedNo, name: HEXAGRAM_NAMES[changedNo], lines: changed },
+        movingLine: moving
+      };
+    }
+
+    /** @param {string} upper @param {string} lower */
+    function hexagramNo(upper, lower){
+      const rowMap = {"坤":0,"艮":1,"坎":2,"巽":3,"震":4,"离":5,"兑":6,"乾":7};
+      const colMap = rowMap;
+      return HEXAGRAM_TABLE[rowMap[upper]][colMap[lower]];
+    }
+
+    /**
+     * 三元判定：按日干支序号（甲子=0）取模 15：0-4上元，5-9中元，10-14下元。
+     * 为时家排局常用规则之一，保证可复现。
+     * @param {string} dayGanzhi
+     */
+    function getYuanByDay(dayGanzhi){
+      const s = dayGanzhi[0], b = dayGanzhi[1];
+      const sIdx = STEMS.indexOf(s), bIdx = BRANCHES.indexOf(b);
+      let idx = 0;
+      for(let i=0;i<60;i++){
+        if(i%10===sIdx && i%12===bIdx){ idx=i; break; }
+      }
+      const r = idx % 15;
+      if(r<=4) return {yuan:"上元", index:0, ganZhiIndex: idx};
+      if(r<=9) return {yuan:"中元", index:1, ganZhiIndex: idx};
+      return {yuan:"下元", index:2, ganZhiIndex: idx};
+    }
+
+    const JIEQI_YANG = {
+      "冬至":[1,7,4],"小寒":[2,8,5],"大寒":[3,9,6],"立春":[8,5,2],"雨水":[9,6,3],"惊蛰":[1,7,4],
+      "春分":[3,9,6],"清明":[4,1,7],"谷雨":[5,2,8],"立夏":[4,1,7],"小满":[5,2,8],"芒种":[6,3,9]
+    };
+    const JIEQI_YIN = {
+      "夏至":[9,3,6],"小暑":[8,2,5],"大暑":[7,1,4],"立秋":[2,5,8],"处暑":[1,4,7],"白露":[9,3,6],
+      "秋分":[7,1,4],"寒露":[6,9,3],"霜降":[5,8,2],"立冬":[6,9,3],"小雪":[5,8,2],"大雪":[4,7,1]
+    };
+
+    /** @param {Date} date */
+    function getYinYangDun(date){
+      const y = toShanghaiParts(date).year;
+      const summer = solarTermDate(y,11);
+      const winter = solarTermDate(y,23);
+      if(date >= winter || date < summer) return "阳遁";
+      return "阴遁";
+    }
+
+    /** @param {Date} date */
+    function currentJie(date){
+      const terms = [...getSolarTermsOfYear(toShanghaiParts(date).year-1),...getSolarTermsOfYear(toShanghaiParts(date).year),...getSolarTermsOfYear(toShanghaiParts(date).year+1)]
+        .sort((a,b)=>a.date-b.date);
+      let current = terms[0];
+      for(const t of terms){
+        if(t.date <= date) current = t;
+      }
+      return current.name;
+    }
+
+    /** @param {Date} date */
+    function calcQimen(date){
+      const gz = getGanzhi(date);
+      const yinYang = getYinYangDun(date);
+      const jie = currentJie(date);
+      const yuan = getYuanByDay(gz.day);
+      const table = yinYang === "阳遁" ? JIEQI_YANG : JIEQI_YIN;
+      const juCandidates = table[jie] || [1,2,3];
+      const ju = juCandidates[yuan.index];
+
+      const earthSeq = yinYang === "阳遁" ? EARTH_STEMS_YANG : EARTH_STEMS_YIN;
+      const earth = buildCycleOnPalaces(earthSeq, ju, yinYang);
+
+      const zhiShiDoorIndex = positiveMod(gz.indexes.hourBranchIdx,8);
+      const zhiFuStarIndex = positiveMod(gz.indexes.hourBranchIdx,9);
+
+      const stars = buildCycleOnPalaces(STAR_ORDER, zhiFuStarIndex+1, yinYang, true);
+      const doors = buildCycleOnPalaces(DOOR_ORDER, zhiShiDoorIndex+1, yinYang, false, true);
+      const gods = buildCycleOnPalaces(yinYang==="阳遁"?GOD_YANG:GOD_YIN, 1, yinYang, false, true);
+
+      const tianGan = {};
+      for(const p of NINE_PALACE_ORDER){
+        const star = stars[p];
+        const starIdx = STAR_ORDER.indexOf(star);
+        tianGan[p] = earth[NINE_PALACE_ORDER[starIdx]];
+      }
+
+      const palaces = {};
+      for(const p of NINE_PALACE_ORDER){
+        palaces[p] = {
+          宫: PALACE_NAMES[p],
+          地盘天干: earth[p] || "",
+          天盘天干: tianGan[p] || "",
+          九星: stars[p] || "",
+          八门: p===5?"中":(doors[p] || ""),
+          八神: p===5?"中":(gods[p] || "")
+        };
+      }
+
+      const valueStarPalace = Object.keys(stars).find(k=>stars[k]==="禽") || "5";
+      const valueDoorPalace = Object.keys(doors).find(k=>doors[k]==="开") || "6";
+
+      return {
+        system: "时家奇门遁甲",
+        method: "转盘法（按节气）",
+        ganzhi: gz,
+        yinYang,
+        jieQi: jie,
+        yuan,
+        ju,
+        value: {
+          值符: `天禽星落${PALACE_NAMES[Number(valueStarPalace)]}`,
+          值使: `开门落${PALACE_NAMES[Number(valueDoorPalace)]}`
+        },
+        palaces,
+        process: [
+          `1) 干支：年柱${gz.year}，月柱${gz.month}（按节气${gz.monthTerm}切换），日柱${gz.day}，时柱${gz.hour}`,
+          `2) 遁局判定：夏至后阴遁、冬至后阳遁，当前为${yinYang}`,
+          `3) 当前节气：${jie}；日干支序号=${yuan.ganZhiIndex}，归属${yuan.yuan}`,
+          `4) 依据${yinYang}+${jie}+${yuan.yuan} => ${ju}局`,
+          "5) 地盘按三奇六仪顺/逆布，天盘随值符星转，八门随值使布，八神随遁法顺逆。"
+        ]
+      };
+    }
+
+    /**
+     * @param {string[]} seq
+     * @param {number} startPos 1-based
+     * @param {string} yinYang
+     * @param {boolean=} includeCenter
+     * @param {boolean=} skipCenter
+     */
+    function buildCycleOnPalaces(seq, startPos, yinYang, includeCenter=false, skipCenter=false){
+      const result = {};
+      const route = includeCenter ? NINE_PALACE_ORDER : NINE_PALACE_ORDER.filter(p=>p!==5);
+      const idxStart = positiveMod(startPos-1, route.length);
+      const direction = yinYang === "阳遁" ? 1 : -1;
+      for(let i=0;i<seq.length;i++){
+        const targetIdx = positiveMod(idxStart + direction*i, route.length);
+        const palace = route[targetIdx];
+        if(skipCenter && palace===5) continue;
+        result[palace] = seq[i];
+      }
+      return result;
+    }
+
+    /** @param {number} p */
+    function getPalaceDirection(p){
+      return PALACE_DIRECTIONS[p] || "未知";
+    }
+
+    /** @param {{八门:string,九星:string,八神:string,宫:string}} palace */
+    function evaluatePalace(palace){
+      const door = DOOR_META[palace.八门] || DOOR_META.中;
+      const star = STAR_META[palace.九星] || { level:"平", score:0, note:"" };
+      const god = GOD_META[palace.八神] || GOD_META.中;
+      const total = door.score + star.score + god.score;
+      const level = total >= 2 ? "吉" : (total <= -2 ? "凶" : "平");
+      return { total, level, door, star, god };
+    }
+
+    /** @param {number} p @param {{八门:string,九星:string,八神:string,宫:string}} palace */
+    function buildPalaceDetail(p, palace){
+      const ev = evaluatePalace(palace);
+      const reasons = [
+        `门：${palace.八门}（${ev.door.level}，${ev.door.note}）`,
+        `星：${palace.九星}（${ev.star.level}，${ev.star.note}）`,
+        `神：${palace.八神}（${ev.god.level}，${ev.god.note}）`
+      ];
+      const suggestion = ev.level === "吉"
+        ? "建议：将会面、签约、投递、拜访等主动动作放在该方位优先执行。"
+        : ev.level === "凶"
+          ? "建议：该方位宜降杠杆，避免硬碰硬，先补证据、做风控与备份方案。"
+          : "建议：该方位适合观察、沟通、收集信息，不宜一次性重仓推进。";
+      return {
+        title: `${palace.宫}（${getPalaceDirection(p)}）${ev.level}`,
+        body: [
+          `综合评分：${ev.total >=0 ? "+" : ""}${ev.total}（门主/星辅/神佐）`,
+          ...reasons,
+          `判断：${ev.level}。`,
+          suggestion
+        ].join("\n")
+      };
+    }
+
+    /** @param {any} result */
+    function summarizeDirections(result){
+      const details = [];
+      for (const p of NINE_PALACE_ORDER) {
+        if (p === 5) continue;
+        const palace = result.palaces[p];
+        const ev = evaluatePalace(palace);
+        details.push({ p, dir: getPalaceDirection(p), level: ev.level, total: ev.total, palace });
+      }
+      details.sort((a,b)=>b.total-a.total);
+      return {
+        good: details.filter(x=>x.level==="吉"),
+        bad: details.filter(x=>x.level==="凶"),
+        neutral: details.filter(x=>x.level==="平"),
+        all: details
+      };
+    }
+
+    /** @param {Topic} topic @param {string[]} cases @param {any} result @param {string} question */
+    function buildInterpretation(topic, cases, result, question){
+      const c = cases.length?`特殊因素：${cases.join("、")}`:"特殊因素：无";
+      if(result.system === "梅花易数"){
+        const moveAdvice = result.movingLine <= 2
+          ? "动爻在下卦，更多是你方执行层面的调整，先改方法与节奏。"
+          : result.movingLine <= 4
+            ? "动爻在中位，重点在关系与协同，先处理沟通误差和角色边界。"
+            : "动爻在上卦，外部环境与结果层变化更强，宜预留时间窗口。";
+        const trendAdvice = result.changed.number > result.original.number
+          ? "变卦序数上行，趋势偏向由阻到通，但需要持续投入。"
+          : "变卦序数回落，趋势偏向先难后稳，宜先守后攻。";
+        return [
+          `问题类别：${topic.label}`,
+          `维度：${topic.dimensions.join(" / ")}`,
+          c,
+          question ? `问题描述：${question}` : "问题描述：未填写",
+          `本卦：${result.original.number} ${result.original.name}（上${result.original.upper}下${result.original.lower}）`,
+          `动爻：第${result.movingLine}爻，变卦：${result.changed.number} ${result.changed.name}`,
+          `局势分析：${moveAdvice}`,
+          `趋势判断：${trendAdvice}`,
+          "行动建议：先定一个7天内可验证的小目标，用结果倒推资源配置，避免只停留在情绪判断。"
+        ].join("\n");
+      }
+      const summary = summarizeDirections(result);
+      const best = summary.good.slice(0,3).map(x=>`${x.dir}（${x.palace.八门}/${x.palace.九星}/${x.palace.八神}）`).join("、") || "暂无明显吉方";
+      const worst = summary.bad.slice(0,3).map(x=>`${x.dir}（${x.palace.八门}/${x.palace.九星}/${x.palace.八神}）`).join("、") || "暂无明显凶方";
+      return [
+        `问题类别：${topic.label}`,
+        `维度：${topic.dimensions.join(" / ")}`,
+        c,
+        question ? `问题描述：${question}` : "问题描述：未填写",
+        `奇门：${result.yinYang}${result.ju}局，${result.value.值符}，${result.value.值使}`,
+        `吉方优先：${best}`,
+        `凶方回避：${worst}`,
+        "判读说明：门为主、星为辅、神为佐；方位结论用于行动优先级，不替代客观证据。",
+        "解读建议：先在吉方安排关键动作（见人、签约、求财），凶方事项改为复盘、风控、资料补齐。"
+      ].join("\n");
+    }
+
+    function initUI(){
+      const topicSel = document.getElementById("topic");
+      const specialWrap = document.getElementById("specialWrap");
+      TOPICS.forEach(t=>{
+        const opt = document.createElement("option");
+        opt.value=t.id; opt.textContent=t.label;
+        topicSel.appendChild(opt);
+      });
+      SPECIAL_CASES.forEach(name=>{
+        const label = document.createElement("label");
+        const cb = document.createElement("input");
+        cb.type="checkbox"; cb.value=name;
+        label.appendChild(cb);
+        label.append(name);
+        specialWrap.appendChild(label);
+      });
+      topicSel.addEventListener("change", updateTopicMeta);
+      updateTopicMeta();
+      setNowTime();
+      document.getElementById("nowBtn").addEventListener("click", setNowTime);
+      document.getElementById("runBtn").addEventListener("click", run);
+      document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
+      document.getElementById("palaceModal").addEventListener("click", (e)=>{
+        if(e.target.id === "palaceModal") closeModal();
+      });
+    }
+
+    function updateTopicMeta(){
+      const id = document.getElementById("topic").value;
+      const t = TOPICS.find(x=>x.id===id);
+      document.getElementById("topicMeta").textContent = `id: ${t.id}；解读维度：${t.dimensions.join("、")}`;
+    }
+
+    function setNowTime(){
+      const p = toShanghaiParts(new Date());
+      document.getElementById("dt").value = partsToLocalDatetimeValue(p);
+    }
+
+    function run(){
+      try {
+        const system = document.getElementById("system").value;
+        const date = parseDatetimeLocal(document.getElementById("dt").value);
+        const topic = TOPICS.find(t=>t.id===document.getElementById("topic").value);
+        const cases = Array.from(document.querySelectorAll("#specialWrap input:checked")).map(x=>x.value);
+        const question = document.getElementById("question").value.trim();
+        const region = document.getElementById("region").value.trim();
+
+        const result = system === "meihua" ? calcMeihua(date) : calcQimen(date);
+        const payload = {
+          request: {
+            system,
+            timezone: "Asia/Shanghai",
+            datetime: document.getElementById("dt").value,
+            region,
+            topic,
+            specialCases: cases,
+            question
+          },
+          result,
+          interpretation: buildInterpretation(topic, cases, result, question),
+          disclaimer: "本结果仅用于术数研究与娱乐，不构成专业建议。"
+        };
+
+        window.__LAST_DIVINATION_PAYLOAD__ = payload;
+        document.getElementById("interpretOut").textContent = payload.interpretation;
+        document.getElementById("processOut").textContent = system === "meihua"
+          ? `梅花易数计算过程\n- 上卦：${result.calc.upper}\n- 下卦：${result.calc.lower}\n- 动爻：${result.calc.moving}\n- 本卦：${result.original.number} ${result.original.name}\n- 变卦：${result.changed.number} ${result.changed.name}`
+          : `奇门遁甲计算过程\n- ${result.process.join("\n- ")}`;
+
+        renderQimenGrid(system, result);
+      } catch (err) {
+        document.getElementById("processOut").textContent = `计算失败：${err.message}`;
+      }
+    }
+
+    function renderQimenGrid(system, result){
+      const panel = document.getElementById("qimenVisualPanel");
+      const grid = document.getElementById("palaceGrid");
+      const summaryEl = document.getElementById("qimenDirSummary");
+      grid.innerHTML = "";
+      if(system !== "qimen"){
+        panel.style.display = "none";
+        return;
+      }
+      panel.style.display = "block";
+      const summary = summarizeDirections(result);
+      summaryEl.innerHTML = `吉方：${summary.good.map(x=>x.dir).join("、") || "暂无"}；凶方：${summary.bad.map(x=>x.dir).join("、") || "暂无"}；平方：${summary.neutral.map(x=>x.dir).join("、") || "暂无"}<br>值符：${result.value.值符}；值使：${result.value.值使}`;
+      NINE_PALACE_ORDER.forEach(p=>{
+        const d = result.palaces[p];
+        const ev = evaluatePalace(d);
+        const isFocus = d.九星 === "禽" || d.八门 === "开";
+        const item = document.createElement("div");
+        item.className = `palace ${ev.level === "吉" ? "good" : ev.level === "凶" ? "bad" : "neutral"} ${isFocus ? "focus" : ""}`;
+        item.innerHTML = `<div class="palace-head"><strong>${d.宫}</strong><span class="dir">${getPalaceDirection(p)}</span></div>
+          <div class="score ${ev.level === "吉" ? "good" : ev.level === "凶" ? "bad" : "neutral"}">${ev.level}（${ev.total >=0 ? "+" : ""}${ev.total}）${isFocus ? " · 值" : ""}</div>
+          <div>地/天盘：${d.地盘天干} / ${d.天盘天干}</div>
+          <div class="tags">
+            <span class="tag">门 ${d.八门}</span>
+            <span class="tag">星 ${d.九星}</span>
+            <span class="tag">神 ${d.八神}</span>
+          </div>`;
+        item.addEventListener("click", ()=>{
+          const detail = buildPalaceDetail(p, d);
+          openModal(detail.title, detail.body);
+        });
+        grid.appendChild(item);
+      });
+    }
+
+    /** @param {string} title @param {string} body */
+    function openModal(title, body){
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalBody").textContent = body;
+      document.getElementById("palaceModal").classList.add("open");
+    }
+
+    function closeModal(){
+      document.getElementById("palaceModal").classList.remove("open");
+    }
+
+    /** 简单自检，确保核心函数可独立执行。 */
+    function selfTest(){
+      const d = new Date("2026-03-21T10:30:00+08:00");
+      const m = calcMeihua(d);
+      console.assert(m.original.number >=1 && m.original.number<=64, "梅花卦号应在1-64");
+      const q = calcQimen(d);
+      console.assert(["阳遁","阴遁"].includes(q.yinYang), "阴阳遁应合法");
+      console.assert(q.ju>=1 && q.ju<=9, "局数应在1-9");
+    }
+
+    initUI();
+    selfTest();
+  </script>
+</body>
+</html>
