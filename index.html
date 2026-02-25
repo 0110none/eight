@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>术数排盘工具（梅花易数 / 时家奇门遁甲）</title>
+  <title>术数排盘工具（洁洁宝贝专用）</title>
   <style>
     :root {
       --bg: #eef2f7;
@@ -214,45 +214,6 @@
     .legend { margin-top: 10px; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; }
     .legend h3 { margin: 0 0 8px; font-size: 15px; }
     .legend ul { margin: 0; padding-left: 18px; color: #334155; font-size: 13px; }
-    .dir-tools {
-      margin-top: 12px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 12px;
-    }
-    .dir-card {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: #f8fbff;
-      padding: 10px;
-    }
-    .dir-card h3 { margin: 0 0 8px; font-size: 15px; }
-    .wheel-wrap { position: relative; width: 260px; height: 260px; margin: 0 auto; }
-    .sector-wheel, .map-wheel {
-      width: 100%; height: 100%; border-radius: 50%; border: 1px solid #cbd7e6;
-      background: conic-gradient(from -90deg, #c7d5e3 0deg 45deg, #e4ecf5 45deg 90deg, #c7d5e3 90deg 135deg, #e4ecf5 135deg 180deg, #c7d5e3 180deg 225deg, #e4ecf5 225deg 270deg, #c7d5e3 270deg 315deg, #e4ecf5 315deg 360deg);
-    }
-    .map-wheel {
-      background:
-        radial-gradient(circle at center, transparent 0 28%, rgba(255,255,255,.65) 28% 29%, transparent 29% 57%, rgba(255,255,255,.65) 57% 58%, transparent 58%),
-        conic-gradient(from -90deg, #c7d5e3 0deg 45deg, #e4ecf5 45deg 90deg, #c7d5e3 90deg 135deg, #e4ecf5 135deg 180deg, #c7d5e3 180deg 225deg, #e4ecf5 225deg 270deg, #c7d5e3 270deg 315deg, #e4ecf5 315deg 360deg);
-    }
-    .wheel-center {
-      position: absolute; inset: 50% auto auto 50%; transform: translate(-50%,-50%);
-      width: 68px; height: 68px; border-radius: 50%; border: 1px solid #c7d5e3;
-      background: rgba(255,255,255,.9); display: flex; align-items: center; justify-content: center;
-      font-size: 12px; color: #3b4f68;
-    }
-    .dir-label {
-      position: absolute; font-size: 12px; color: #334155; font-weight: 600;
-      transform: translate(-50%,-50%);
-    }
-    .target-dot {
-      position: absolute; width: 12px; height: 12px; border-radius: 50%;
-      background: #b69a63; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(182,154,99,.55);
-      transform: translate(-50%,-50%);
-    }
-    .map-note { margin-top: 8px; font-size: 12px; color: #5b6b7d; text-align: center; }
     .modal {
       position: fixed;
       inset: 0;
@@ -286,7 +247,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>术数排盘工具（梅花易数 / 时家奇门遁甲）</h1>
+    <h1>术数排盘工具（洁洁宝贝专用）</h1>
     <p class="subtitle">专业排盘 · 规则透明 · 便于操作与理解（时区固定 Asia/Shanghai）</p>
     <div class="panel">
       <div class="grid">
@@ -319,17 +280,6 @@
           <div id="topicMeta" class="muted"></div>
         </div>
         <div>
-          <label for="targetDir">目标/对象方向（可选）</label>
-          <select id="targetDir">
-            <option value="">未指定</option>
-            <option>正北</option><option>东北</option><option>正东</option><option>东南</option>
-            <option>正南</option><option>西南</option><option>正西</option><option>西北</option>
-          </select>
-          <label for="targetKm" style="margin-top:8px;">地图扇区半径（2~5km）</label>
-          <input id="targetKm" type="range" min="2" max="5" step="0.5" value="3" />
-          <div id="targetKmTxt" class="muted">当前：3 km</div>
-        </div>
-        <div>
           <label for="question">问题详情</label>
           <textarea id="question" placeholder="请尽量描述背景、目标、时间点"></textarea>
         </div>
@@ -358,35 +308,12 @@
           <li>九星与八神用于修正：如天心/天任/天辅、值符/六合/太阴多助力；白虎/玄武/螣蛇多风险。</li>
         </ul>
             </div>
-      <div class="dir-tools" id="dirTools" style="display:none;">
-        <div class="dir-card">
-          <h3>① 指南针方位图（八方）</h3>
-          <div class="wheel-wrap">
-            <div class="sector-wheel" id="compassWheel"></div>
-            <div class="wheel-center">中心点</div>
-            <div id="compassLabels"></div>
-          </div>
-        </div>
-        <div class="dir-card">
-          <h3>② 地图扇区叠加（2~5km）</h3>
-          <div class="wheel-wrap">
-            <div class="map-wheel" id="mapWheel"></div>
-            <div class="wheel-center" id="mapCenterTxt">半径 3km</div>
-            <div id="mapLabels"></div>
-            <div id="targetDot" class="target-dot" style="display:none;"></div>
-          </div>
-          <div class="map-note" id="mapNote">以你当前位置为中心，按方位切扇区显示吉凶。</div>
-        </div>
-      </div>
     </div>
 
     <div class="panel">
       <div class="stage">STEP 3</div>
       <h2>结果解读</h2>
       <pre id="interpretOut">等待计算...</pre>
-      <div class="disclaimer" style="margin-top:10px;">
-        免责声明：本工具用于传统术数学习与文化研究，不构成法律、医疗、投资等专业建议。重大决策请结合现实证据与专业意见。
-      </div>
     </div>
 
     <div class="panel">
@@ -471,7 +398,6 @@
     const NINE_PALACE_ORDER = [4,9,2,3,5,7,8,1,6];
     const PALACE_NAMES = {1:"坎一",2:"坤二",3:"震三",4:"巽四",5:"中五",6:"乾六",7:"兑七",8:"艮八",9:"离九"};
     const PALACE_DIRECTIONS = {1:"正北",2:"西南",3:"正东",4:"东南",5:"中宫",6:"西北",7:"正西",8:"东北",9:"正南"};
-    const DIRECTION_ORDER = ["正北","东北","正东","东南","正南","西南","正西","西北"];
     const STAR_ORDER = ["蓬","任","冲","辅","英","芮","柱","心","禽"];
     const DOOR_ORDER = ["休","生","伤","杜","景","死","惊","开"];
     const GOD_YANG = ["值符","螣蛇","太阴","六合","白虎","玄武","九地","九天"];
@@ -946,9 +872,6 @@
       setNowTime();
       document.getElementById("nowBtn").addEventListener("click", setNowTime);
       document.getElementById("runBtn").addEventListener("click", run);
-      document.getElementById("targetKm").addEventListener("input", ()=>{
-        document.getElementById("targetKmTxt").textContent = `当前：${document.getElementById("targetKm").value} km`;
-      });
       document.getElementById("toggleProcessBtn").addEventListener("click", toggleProcess);
       document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
       document.getElementById("palaceModal").addEventListener("click", (e)=>{
@@ -974,67 +897,6 @@
       const open = wrap.classList.toggle("open");
       btn.textContent = open ? "点击收起排盘过程" : "点击展开排盘过程";
     }
-
-
-    /** @param {any} result */
-    function buildDirectionSectors(result){
-      const summary = summarizeDirections(result);
-      const byDir = Object.fromEntries(summary.all.map(x=>[x.dir, x]));
-      return DIRECTION_ORDER.map(dir=>{
-        const item = byDir[dir] || { level:"平", total:0 };
-        const color = item.level === "吉" ? "#d8c59a" : item.level === "凶" ? "#9bb0bf" : "#dbe5ef";
-        return { dir, level:item.level, total:item.total, color };
-      });
-    }
-
-    /** @param {HTMLElement} host @param {any[]} sectors @param {number} radius */
-    function renderDirectionLabels(host, sectors, radius){
-      host.innerHTML = "";
-      sectors.forEach((s, i)=>{
-        const angle = (-90 + i*45) * Math.PI / 180;
-        const x = 130 + radius * Math.cos(angle);
-        const y = 130 + radius * Math.sin(angle);
-        const el = document.createElement("div");
-        el.className = "dir-label";
-        el.style.left = `${x}px`;
-        el.style.top = `${y}px`;
-        el.textContent = `${s.dir} ${s.level}`;
-        host.appendChild(el);
-      });
-    }
-
-    function renderDirectionVisuals(system, result, targetDir, targetKm){
-      const wrap = document.getElementById("dirTools");
-      if (system !== "qimen") {
-        wrap.style.display = "none";
-        return;
-      }
-      wrap.style.display = "grid";
-      const sectors = buildDirectionSectors(result);
-      const gradient = sectors.map((s,i)=>`${s.color} ${i*45}deg ${(i+1)*45}deg`).join(",");
-      document.getElementById("compassWheel").style.background = `conic-gradient(from -90deg, ${gradient})`;
-      document.getElementById("mapWheel").style.background = `radial-gradient(circle at center, transparent 0 28%, rgba(255,255,255,.65) 28% 29%, transparent 29% 57%, rgba(255,255,255,.65) 57% 58%, transparent 58%), conic-gradient(from -90deg, ${gradient})`;
-      renderDirectionLabels(document.getElementById("compassLabels"), sectors, 114);
-      renderDirectionLabels(document.getElementById("mapLabels"), sectors, 114);
-      document.getElementById("mapCenterTxt").textContent = `半径 ${targetKm}km`;
-      const dot = document.getElementById("targetDot");
-      if (targetDir) {
-        const idx = DIRECTION_ORDER.indexOf(targetDir);
-        if (idx >= 0) {
-          const angle = (-90 + idx*45) * Math.PI / 180;
-          const r = 75;
-          dot.style.display = "block";
-          dot.style.left = `${130 + r*Math.cos(angle)}px`;
-          dot.style.top = `${130 + r*Math.sin(angle)}px`;
-          const sec = sectors[idx];
-          document.getElementById("mapNote").textContent = `目标方向：${targetDir}，判定：${sec.level}（评分${sec.total>=0?'+':''}${sec.total}），建议结合实地情况取舍。`;
-        }
-      } else {
-        dot.style.display = "none";
-        document.getElementById("mapNote").textContent = "以你当前位置为中心，按方位切扇区显示吉凶。";
-      }
-    }
-
     function run(){
       try {
         document.getElementById("processWrap").classList.remove("open");
@@ -1045,8 +907,6 @@
         const cases = Array.from(document.querySelectorAll("#specialWrap input:checked")).map(x=>x.value);
         const question = document.getElementById("question").value.trim();
         const region = document.getElementById("region").value.trim();
-        const targetDirection = document.getElementById("targetDir").value;
-        const targetKm = Number(document.getElementById("targetKm").value || 3);
 
         const result = system === "meihua" ? calcMeihua(date) : calcQimen(date);
         const payload = {
@@ -1057,9 +917,7 @@
             region,
             topic,
             specialCases: cases,
-            question,
-            targetDirection,
-            targetKm
+            question
           },
           result,
           interpretation: buildInterpretation(topic, cases, result, question),
@@ -1073,7 +931,6 @@
           : `奇门遁甲计算过程\n- ${result.process.join("\n- ")}`;
 
         renderQimenGrid(system, result);
-        renderDirectionVisuals(system, result, targetDirection, targetKm);
       } catch (err) {
         document.getElementById("processOut").textContent = `计算失败：${err.message}`;
       }
@@ -1086,7 +943,6 @@
       grid.innerHTML = "";
       if(system !== "qimen"){
         panel.style.display = "none";
-        document.getElementById("dirTools").style.display = "none";
         return;
       }
       panel.style.display = "block";
